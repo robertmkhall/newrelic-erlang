@@ -6,7 +6,7 @@
 % Exported for testing
 -export([sample_data/0, sample_error_data/0]).
 
--define(BASE_URL, "http://~s/agent_listener/invoke_raw_method?").
+-define(BASE_URL, "https://~s/agent_listener/invoke_raw_method?").
 
 -define(l2b(L), list_to_binary(L)).
 -define(l2i(L), list_to_integer(L)).
@@ -129,13 +129,22 @@ license_key() ->
     {ok, Key} = application:get_env(newrelic, license_key),
     Key.
 
+proxy() ->
+    application:get_env(newrelic, proxy).
 
+option(proxy, {ok, Proxy}) when is_list(Proxy) ->
+    [{proxy, Proxy}];
+option(_, _) ->
+    [].
+
+options() ->
+    option(proxy, proxy()).
 
 request(Url) ->
     request(Url, <<"[]">>).
 
 request(Url, Body) ->
-    lhttpc:request(Url, post, [{"Content-Encoding", "identity"}], Body, 5000).
+    lhttpc:request(Url, post, [{"Content-Encoding", "identity"}], Body, 5000, options()).
 
 
 url(Args) ->
@@ -315,4 +324,3 @@ sample_error_data() ->
 	        ]
 	     }
 	]].
-
